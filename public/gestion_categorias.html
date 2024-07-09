@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Categorías</title>
+    <link rel="stylesheet" href="styles.css">
+    
+</head>
+<body>
+    <h1>Gestión de Categorías</h1>
+    <div><button onclick="location.href='gestiones.html'">Volver a Gestiones</button></div>
+    <form id="create-category-form">
+        <h3>Crear Nueva Categoría</h3>
+        <label for="category-name">Nombre:</label>
+        <input type="text" id="category-name" name="name" required><br>
+        <label for="category-description">Descripción:</label>
+        <input type="text" id="category-description" name="description" required><br>
+        <button type="submit">Crear Categoría</button>
+    </form>
+
+    <form id="get-categories-form">
+        <h3>Obtener Todas las Categorías</h3>
+        <button type="submit">Obtener Categorías</button>
+    </form>
+    <div id="categories-list"></div>
+
+    <form id="update-category-form">
+        <h3>Actualizar Categoría</h3>
+        <label for="update-category-id">ID de la Categoría:</label>
+        <input type="number" id="update-category-id" name="id" required><br>
+        <label for="update-category-name">Nombre:</label>
+        <input type="text" id="update-category-name" name="name"><br>
+        <label for="update-category-description">Descripción:</label>
+        <input type="text" id="update-category-description" name="description"><br>
+        <button type="submit">Actualizar Categoría</button>
+    </form>
+
+    <form id="delete-category-form">
+        <h3>Eliminar Categoría</h3>
+        <label for="delete-category-id">ID de la Categoría:</label>
+        <input type="number" id="delete-category-id" name="id" required><br>
+        <button type="submit">Eliminar Categoría</button>
+    </form>
+
+    <script>
+        document.getElementById('create-category-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                name: e.target.name.value,
+                description: e.target.description.value
+            };
+            const response = await fetch('/categories', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            if (response.ok) {
+                alert('Categoría creada exitosamente');
+                e.target.reset();
+            } else {
+                alert('Error al crear categoría');
+            }
+        });
+
+        document.getElementById('get-categories-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const response = await fetch('/categories');
+            if (response.ok) {
+                const categories = await response.json();
+                document.getElementById('categories-list').innerText = JSON.stringify(categories, null, 2);
+            } else {
+                alert('Error al obtener categorías');
+            }
+        });
+
+        document.getElementById('update-category-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const categoryId = e.target['id'].value;
+            const data = {
+                name: e.target['name'].value,
+                description: e.target['description'].value
+            };
+            const response = await fetch(`/categories/${categoryId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            if (response.ok) {
+                alert('Categoría actualizada exitosamente');
+                e.target.reset();
+            } else {
+                alert('Error al actualizar categoría');
+            }
+        });
+
+        document.getElementById('delete-category-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const categoryId = e.target['id'].value;
+            const response = await fetch(`/categories/${categoryId}`, {
+                method: 'DELETE'
+            });
+            if (response.ok) {
+                alert('Categoría eliminada exitosamente');
+                e.target.reset();
+            } else {
+                alert('Error al eliminar categoría');
+            }
+        });
+    </script>
+    
+
+</body>
+</html>

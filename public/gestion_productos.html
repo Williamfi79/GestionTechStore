@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Productos</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Gestión de Productos</h1>
+    <form id="create-product-form">
+        <h3>Crear Producto Nuevo</h3>
+        <label for="product-name">Nombre:</label>
+        <input type="text" id="product-name" name="name" required><br>
+        <label for="product-description">Descripción:</label>
+        <input type="text" id="product-description" name="description" required><br>
+        <label for="product-price">Precio:</label>
+        <input type="number" id="product-price" name="price" required><br>
+        <label for="product-stock">Cantidad en Stock:</label>
+        <input type="number" id="product-stock" name="stock" required><br>
+        <label for="product-category">Categoría:</label>
+        <input type="text" id="product-category" name="category" required><br>
+        <button type="submit">Crear Producto</button>
+    </form>
+
+    <form id="get-product-form">
+        <h3>Obtener Detalles de un Producto</h3>
+        <label for="product-id">ID del Producto:</label>
+        <input type="number" id="product-id" name="id" required><br>
+        <button type="submit">Obtener Detalles</button>
+    </form>
+    <div id="product-details"></div>
+
+    <form id="update-product-form">
+        <h3>Actualizar Producto Existente</h3>
+        <label for="update-product-id">ID del Producto:</label>
+        <input type="number" id="update-product-id" name="id" required><br>
+        <label for="update-product-name">Nombre:</label>
+        <input type="text" id="update-product-name" name="name"><br>
+        <label for="update-product-description">Descripción:</label>
+        <input type="text" id="update-product-description" name="description"><br>
+        <label for="update-product-price">Precio:</label>
+        <input type="number" id="update-product-price" name="price"><br>
+        <label for="update-product-stock">Cantidad en Stock:</label>
+        <input type="number" id="update-product-stock" name="stock"><br>
+        <label for="update-product-category">Categoría:</label>
+        <input type="text" id="update-product-category" name="category"><br>
+        <button type="submit">Actualizar Producto</button>
+    </form>
+
+    <form id="delete-product-form">
+        <h3>Eliminar Producto</h3>
+        <label for="delete-product-id">ID del Producto:</label>
+        <input type="number" id="delete-product-id" name="id" required><br>
+        <button type="submit">Eliminar Producto</button>
+    </form>
+
+    <script>
+        document.getElementById('create-product-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                name: e.target.name.value,
+                description: e.target.description.value,
+                price: e.target.price.value,
+                stock: e.target.stock.value,
+                category: e.target.category.value
+            };
+            const response = await fetch('/products', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            if (response.ok) {
+                alert('Producto creado exitosamente');
+                e.target.reset();
+            } else {
+                alert('Error al crear producto');
+            }
+        });
+
+        document.getElementById('get-product-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const productId = e.target['id'].value;
+            const response = await fetch(`/products/${productId}`);
+            if (response.ok) {
+                const product = await response.json();
+                document.getElementById('product-details').innerText = JSON.stringify(product, null, 2);
+            } else {
+                alert('Error al obtener detalles del producto');
+            }
+        });
+
+        document.getElementById('update-product-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const productId = e.target['id'].value;
+            const data = {
+                name: e.target['name'].value,
+                description: e.target['description'].value,
+                price: e.target['price'].value,
+                stock: e.target['stock'].value,
+                category: e.target['category'].value
+            };
+            const response = await fetch(`/products/${productId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            if (response.ok) {
+                alert('Producto actualizado exitosamente');
+                e.target.reset();
+            } else {
+                alert('Error al actualizar producto');
+            }
+        });
+
+        document.getElementById('delete-product-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const productId = e.target['id'].value;
+            const response = await fetch(`/products/${productId}`, {
+                method: 'DELETE'
+            });
+            if (response.ok) {
+                alert('Producto eliminado exitosamente');
+                e.target.reset();
+            } else {
+                alert('Error al eliminar producto');
+            }
+        });
+    </script>
+</body>
+</html>
