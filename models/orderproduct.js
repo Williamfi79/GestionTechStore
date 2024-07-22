@@ -1,22 +1,39 @@
 module.exports = (sequelize, DataTypes) => {
-    const OrderProduct = sequelize.define('OrderProduct', {
-      orderId: {
-        type: DataTypes.INTEGER,
-        allowNull: false
+  const OrderProduct = sequelize.define('OrderProduct', {
+    orderId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: 'Orders', // Nombre de la tabla referenciada
+        key: 'id',
       },
-      productId: {
-        type: DataTypes.INTEGER,
-        allowNull: false
+      primaryKey: true,
+    },
+    productId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: 'Products', // Nombre de la tabla referenciada
+        key: 'id',
       },
-      quantity: {
-        type: DataTypes.INTEGER,
-        allowNull: false
-      }
-    }, {});
-    OrderProduct.associate = function(models) {
-      // associations can be defined here
-    };
-    return OrderProduct;
+      primaryKey: true,
+    },
+    quantity: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    createdAt: {
+      type: DataTypes.DATE,
+      defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
+    },
+    updatedAt: {
+      type: DataTypes.DATE,
+      defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
+    },
+  }, {});
+
+  OrderProduct.associate = function(models) {
+    OrderProduct.belongsTo(models.Order, { foreignKey: 'orderId' });
+    OrderProduct.belongsTo(models.Product, { foreignKey: 'productId' });
   };
-  
-  
+
+  return OrderProduct;
+};

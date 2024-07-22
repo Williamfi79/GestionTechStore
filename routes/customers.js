@@ -1,61 +1,71 @@
 const express = require('express');
 const router = express.Router();
-const { Customer } = require('../models');
+const db = require('../models');
+const Customer = db.Customer;
 
-// Crear cliente
-router.post('/', async (req, res) => {
-  const { name, email, phone, address } = req.body;
-  try {
-    const customer = await Customer.create({ name, email, phone, address });
-    res.status(201).json(customer);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
+// Obtener todos los clientes
+router.get('/', async (req, res) => {
+    try {
+        const customers = await Customer.findAll();
+        res.json(customers);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
-// Obtener detalles de cliente
+// Obtener un cliente por ID
 router.get('/:id', async (req, res) => {
-  try {
-    const customer = await Customer.findByPk(req.params.id);
-    if (customer) {
-      res.json(customer);
-    } else {
-      res.status(404).send('Customer not found');
+    try {
+        const customer = await Customer.findByPk(req.params.id);
+        if (customer) {
+            res.json(customer);
+        } else {
+            res.status(404).json({ error: 'Cliente no encontrado' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
 });
 
-// Actualizar cliente
+// Crear un nuevo cliente
+router.post('/', async (req, res) => {
+    try {
+        const customer = await Customer.create(req.body);
+        res.status(201).json(customer);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
+
+// Actualizar un cliente existente
 router.put('/:id', async (req, res) => {
-  const { name, email, phone, address } = req.body;
-  try {
-    const customer = await Customer.findByPk(req.params.id);
-    if (customer) {
-      await customer.update({ name, email, phone, address });
-      res.json(customer);
-    } else {
-      res.status(404).send('Customer not found');
+    try {
+        const customer = await Customer.findByPk(req.params.id);
+        if (customer) {
+            await customer.update(req.body);
+            res.json(customer);
+        } else {
+            res.status(404).json({ error: 'Cliente no encontrado' });
+        }
+    } catch (error) {
+        res.status(400).json({ error: error.message });
     }
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
 });
 
-// Eliminar cliente
+// Eliminar un cliente
 router.delete('/:id', async (req, res) => {
-  try {
-    const customer = await Customer.findByPk(req.params.id);
-    if (customer) {
-      await customer.destroy();
-      res.status(204).send();
-    } else {
-      res.status(404).send('Customer not found');
+    try {
+        const customer = await Customer.findByPk(req.params.id);
+        if (customer) {
+            await customer.destroy();
+            res.status(204).json();
+        } else {
+            res.status(404).json({ error: 'Cliente no encontrado' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
 });
 
 module.exports = router;
+

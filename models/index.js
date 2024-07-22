@@ -25,6 +25,8 @@ fs
     db[model.name] = model;
   });
 
+console.log(db); // Añadir esta línea para verificar los modelos cargados
+
 Object.keys(db).forEach(modelName => {
   if (db[modelName].associate) {
     db[modelName].associate(db);
@@ -35,3 +37,4 @@ db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
 module.exports = db;
+

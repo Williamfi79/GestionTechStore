@@ -1,10 +1,11 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const { Sequelize, DataTypes } = require('sequelize');
-const path = require('path');
 const app = express();
 const port = 3000;
+const authController = require('./controllers/authController');
 
+// Configuración de Sequelize
 const sequelize = new Sequelize('techstore_db', 'root', 'root', {
   host: 'localhost',
   dialect: 'mysql'
@@ -17,61 +18,47 @@ const Customer = db.Customer;
 const Order = db.Order;
 const OrderProduct = db.OrderProduct;
 const Category = db.Category;
+const User = db.User; // Importar el modelo User
 
-// Asociaciones
-Product.associate(db);
-Customer.associate(db);
-Order.associate(db);
-OrderProduct.associate(db);
-Category.associate(db);
+// Asociaciones (si las hay)
+if (Product.associate) Product.associate(db);
+if (Customer.associate) Customer.associate(db);
+if (Order.associate) Order.associate(db);
+if (OrderProduct.associate) OrderProduct.associate(db);
+if (Category.associate) Category.associate(db);
 
+// Middleware de registro
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path}`);
+  next();
+});
+
+// Configuración del middleware body-parser
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, 'public')));
 
+const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
 const customerRoutes = require('./routes/customers');
 const orderRoutes = require('./routes/orders');
+const orderProductRoutes = require('./routes/orderproducts');
 const categoryRoutes = require('./routes/categories');
 
-app.use('/products', productRoutes);
-app.use('/customers', customerRoutes);
-app.use('/orders', orderRoutes);
-app.use('/categories', categoryRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/products', authController.verifyToken, productRoutes);
+app.use('/api/customers', authController.verifyToken, customerRoutes);
+app.use('/api/orders', authController.verifyToken, orderRoutes);
+app.use('/api/orderproducts', authController.verifyToken, orderProductRoutes);
+app.use('/api/categories', authController.verifyToken, categoryRoutes);
 
-// Ruta para la raíz de la aplicación
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// Ruta para la página de gestiones
-app.get('/gestiones.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'gestiones.html'));
-});
-
-// Rutas para las páginas de gestión específicas
-app.get('/gestion_productos.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'gestion_productos.html'));
-});
-
-app.get('/gestion_clientes.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'gestion_clientes.html'));
-});
-
-app.get('/gestion_ordenes.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'gestion_ordenes.html'));
-});
-
-app.get('/gestion_categorias.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'gestion_categorias.html'));
-});
-
-app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
-  sequelize.sync().then(() => {
-    console.log('Database synchronized');
-  }).catch(err => {
-    console.error('Unable to synchronize the database:', err);
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(port, () => {
+    console.log(`Server running on http://localhost:${port}`);
+    sequelize.sync({ force: true }).then(() => {
+      console.log('Database synchronized');
+    }).catch(err => {
+      console.error('Unable to synchronize the database:', err);
+    });
   });
-});
+}
 
-
+module.exports = app; // Exportar la app para las pruebas

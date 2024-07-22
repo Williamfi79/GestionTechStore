@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { Order } = require('../models');
+const db = require('../models');
+const Order = db.Order;
 
 // Crear orden
 router.post('/', async (req, res) => {
@@ -59,3 +60,4 @@ router.delete('/:id', async (req, res) => {
 });
 
 module.exports = router;
+
